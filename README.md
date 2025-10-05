@@ -7,6 +7,7 @@
 [![Gaming](https://img.shields.io/badge/Gaming-Infrastructure-purple)](https://github.com/Gzeu/StardustEngine)
 
 ## 🎮 Overview
+
 StardustEngine is a comprehensive gaming infrastructure built on MultiversX blockchain, designed to power the next generation of Web3 games. It provides developers with tools, smart contracts, and APIs to create immersive gaming experiences with true asset ownership.
 
 ## ✨ Key Features
@@ -14,31 +15,25 @@ StardustEngine is a comprehensive gaming infrastructure built on MultiversX bloc
 ### 🏗️ Infrastructure Components
 - **Smart Contract Suite** - Pre-built gaming contracts (NFTs, tokens, marketplace)
 - **Cross-Game Assets** - Interoperable items and characters across multiple games
-- **Player Identity System** - Unified player profiles and achievements
 - **Economic Engine** - In-game economies with real value exchange
-
-### ✅ **Current Services (All Running in Container)**
-
-#### 🌐 **API Server (Port 8000)**
-- **Status**: ✅ Running on `http://localhost:8000`
-- **Framework**: FastAPI (Python)
-- **Endpoints**:
-  - `GET /` - API status and info
-  - `GET /health` - Health check
-  - `GET /contract/info` - Contract information
-  - `POST /contract/call` - Call contract functions
-  - `GET /contract/endpoints` - Available endpoints
-
-#### 🎨 **Frontend Dashboard (Port 3000)**
-- **Status**: ✅ Running on `http://localhost:3000`
-- **Technology**: HTML + JavaScript + CSS
-  - Real-time contract interaction
-  - Test contract endpoints
-  - View deployment information
-  - Responsive design
 
 ### 🎯 Gaming Features
 - **NFT Gaming Assets** - weapons, characters, skins as tradeable NFTs
+- **Achievement System** - Blockchain-verified accomplishments and badges
+- **Frontend Dashboard (Port 3000)**
+- **Status**: ✅ Running on `http://localhost:3000/dashboard.html`
+- **Technology**: Modern HTML + JavaScript + CSS (React-like architecture)
+- **Features**:
+  - **State Management**: React-like state handling with real-time updates
+  - **Component Architecture**: Modular design with reusable UI components
+  - **Interactive Dashboard**: Professional gaming infrastructure interface
+  - **Real-time Testing**: Live contract interaction with visual feedback
+  - **Keyboard Shortcuts**: H (hello), V (version), I (info)
+  - **Responsive Grid Layout**: Modern CSS Grid with mobile support
+  - **Statistics Display**: Contract metrics and performance indicators
+  - **Error Handling**: Comprehensive error states and loading indicators
+### 🎯 Gaming Features
+- **NFT Gaming Assets** - Weapons, characters, skins as tradeable NFTs
 - **Achievement System** - Blockchain-verified accomplishments and badges
 - **Tournament Platform** - Competitive gaming with crypto rewards
 - **Guild Management** - Decentralized gaming communities
@@ -47,7 +42,6 @@ StardustEngine is a comprehensive gaming infrastructure built on MultiversX bloc
 - **SDK & APIs** - Easy integration for game developers
 - **Asset Creator** - Tools for designing and minting game assets
 - **Analytics Dashboard** - Real-time game metrics and player insights
-- **Testing Suite** - Local development and testing environment
 
 ## 🛠️ Tech Stack
 
@@ -56,13 +50,12 @@ StardustEngine is a comprehensive gaming infrastructure built on MultiversX bloc
 | Blockchain | MultiversX (eGLD) |
 | Smart Contracts | Rust |
 | Backend API | FastAPI (Python) |
-| Frontend | HTML + JavaScript + CSS |
+| Frontend | Modern HTML + JavaScript + CSS |
 | Database | MongoDB |
 | Storage | IPFS |
 | Testing | Rust + Jest |
 
 ## 🚀 Quick Start
-
 ### Prerequisites
 - Docker Desktop installed and running
 - Git installed
@@ -148,19 +141,19 @@ mxpy contract upgrade <contract-address> --bytecode=output/stardust-contracts.wa
 ├── docs/                     # Documentation
 ├── scripts/                  # Deployment and utility scripts
 └── tests/                    # Test suites
-```
 
-## 🎯 Roadmap
+## 🎯 roadmap
 
 ### Phase 1: Foundation (Q4 2025) ✅ **COMPLETED**
 - [x] **Core smart contracts** - Basic contract with hello/get_version endpoints deployed
 - [x] **Local development environment** - Docker setup with MultiversX tools
+- [x] **Docker setup with MultiversX tools**
 - [x] **Documentation and tutorials** - Complete setup and deployment guide
 - [x] **Testnet deployment** - Contract successfully deployed on MultiversX devnet
 
 ### Phase 2: Gaming Features (Q1 2026)
 - [ ] Cross-game asset system
-- [ ] Player identity and achievements
+{{ ... }}
 - [ ] Tournament platform
 - [ ] Guild management system
 
