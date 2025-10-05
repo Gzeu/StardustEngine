@@ -50,7 +50,7 @@ StardustEngine is a comprehensive gaming infrastructure built on MultiversX bloc
 | Blockchain | MultiversX (eGLD) |
 | Smart Contracts | Rust |
 | Backend API | FastAPI (Python) |
-| Frontend | Modern HTML + JavaScript + CSS |
+| Frontend | Modern HTML + JavaScript + CSS (React-like) |
 | Database | MongoDB |
 | Storage | IPFS |
 | Testing | Rust + Jest |
