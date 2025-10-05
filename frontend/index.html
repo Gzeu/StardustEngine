@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StardustEngine - Gaming Infrastructure</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        .contract-info {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            border-left: 4px solid #667eea;
+        }
+
+        .contract-address {
+            font-family: monospace;
+            background: #e9ecef;
+            padding: 0.5rem;
+            border-radius: 5px;
+            word-break: break-all;
+            margin: 0.5rem 0;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: #28a745;
+            color: white;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: transform 0.2s;
+            min-width: 120px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .result {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: monospace;
+        }
+
+        .loading {
+            color: #667eea;
+        }
+
+        .error {
+            color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .success {
+            color: #28a745;
+            background: #d4edda;
+        }
+
+        .footer {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .network-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .network-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+        }
+
+        .devnet {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .explorer-link {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .explorer-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🌟 StardustEngine</div>
+        <div class="subtitle">Gaming Infrastructure on MultiversX Blockchain</div>
+
+        <div class="status-badge">✅ LIVE ON DEVNET</div>
+
+        <div class="contract-info">
+            <div class="network-info">
+                <span>Network: <span class="network-badge devnet">Devnet</span></span>
+                <span>WASM: <strong>451 bytes</strong></span>
+            </div>
+            <div>
+                <strong>Contract Address:</strong><br>
+                <div class="contract-address">erd1qqqqqqqqqqqqqpgqfm0kd3wse7ddgtf4haplm3p5mdl90msp634qxrfmt3</div>
+                <a href="https://devnet-explorer.multiversx.com/accounts/erd1qqqqqqqqqqqqqpgqfm0kd3wse7ddgtf4haplm3p5mdl90msp634qxrfmt3" target="_blank" class="explorer-link">View in Explorer ↗</a>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button class="btn" onclick="callHello()">Test Hello</button>
+            <button class="btn" onclick="callVersion()">Get Version</button>
+            <button class="btn" onclick="getContractInfo()">Contract Info</button>
+        </div>
+
+        <div id="result" class="result">Click a button to test the contract</div>
+
+        <div class="footer">
+            <div>🚀 Built with MultiversX Smart Contracts</div>
+            <div>🔗 Powered by FastAPI + React Frontend</div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+        const CONTRACT_ADDRESS = 'erd1qqqqqqqqqqqqqpgqfm0kd3wse7ddgtf4haplm3p5mdl90msp634qxrfmt3';
+
+        async function makeRequest(endpoint, options = {}) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.className = 'result loading';
+            resultDiv.textContent = 'Loading...';
+
+            try {
+                const response = await fetch(`${API_BASE}${endpoint}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    ...options
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                resultDiv.className = 'result success';
+                resultDiv.textContent = JSON.stringify(data, null, 2);
+
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        async function callHello() {
+            await makeRequest('/contract/call', {
+                method: 'POST',
+                body: JSON.stringify({
+                    function: 'hello',
+                    args: []
+                })
+            });
+        }
+
+        async function callVersion() {
+            await makeRequest('/contract/call', {
+                method: 'POST',
+                body: JSON.stringify({
+                    function: 'get_version',
+                    args: []
+                })
+            });
+        }
+
+        async function getContractInfo() {
+            await makeRequest('/contract/info');
+        }
+
+        // Auto-load contract info on page load
+        window.onload = function() {
+            getContractInfo();
+        };
+    </script>
+</body>
+</html>
