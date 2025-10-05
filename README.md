@@ -22,13 +22,10 @@ StardustEngine is a comprehensive gaming infrastructure built on MultiversX bloc
 - **NFT Gaming Assets** - Weapons, characters, skins as tradeable NFTs
 - **Achievement System** - Blockchain-verified accomplishments and badges
 - **Tournament Platform** - Competitive gaming with crypto rewards
-- **Guild Management** - Decentralized gaming communities
-
 ### 🔧 Developer Tools
 - **SDK & APIs** - Easy integration for game developers
 - **Asset Creator** - Tools for designing and minting game assets
 - **Analytics Dashboard** - Real-time game metrics and player insights
-- **Testing Suite** - Local development and testing environment
 
 ## 🛠️ Tech Stack
 
@@ -36,7 +33,6 @@ StardustEngine is a comprehensive gaming infrastructure built on MultiversX bloc
 |-----------|------------|
 | Blockchain | MultiversX (eGLD) |
 | Smart Contracts | Rust |
-| Backend API | FastAPI (Python) |
 | Frontend | React + TypeScript |
 | Database | MongoDB |
 | Storage | IPFS |
@@ -47,7 +43,7 @@ StardustEngine is a comprehensive gaming infrastructure built on MultiversX bloc
 ### Prerequisites
 - Docker Desktop installed and running
 - Git installed
-- Node.js 18+ (for frontend development)
+- MultiversX CLI tools (mxpy)
 
 ### 1. Clone Repository
 ```bash
@@ -55,39 +51,69 @@ git clone https://github.com/Gzeu/StardustEngine.git
 cd StardustEngine
 ```
 
-### 2. MultiversX Development Environment (Docker)
+### 2. Start Development Environment
 ```bash
-# Start MultiversX development container
-docker run --rm -it -v "$(pwd):/workspace" multiversx/devcontainer-smart-contracts-rust:latest bash
+# Option A: Use Docker development environment
+docker run --rm -it -v "$(pwd):/workspace" -p 8080:8080 -p 3000:3000 -p 8000:8000 multiversx/devcontainer-smart-contracts-rust:latest bash
 
-# Inside container
+# Option B: Use local development setup
+# Install Rust and MultiversX tools locally
+```
+
+### 3. Deploy to MultiversX Devnet
+
+#### Automatic Deployment (Recommended)
+```bash
+# Inside Docker container
 cd /workspace
+
+# Create wallet for deployment
+mxpy wallet new --format pem --outfile stardust-wallet.pem
+
+# Get testnet funds
+mxpy faucet request --pem=stardust-wallet.pem --wallet-url=https://devnet-wallet.multiversx.com --api=https://devnet-api.multiversx.com
+
+# Deploy contract
+mxpy contract deploy --bytecode=stardust-contracts/output/stardust-contracts.wasm --pem=stardust-wallet.pem --gas-limit=60000000 --proxy=https://devnet-gateway.multiversx.com --send
 ```
 
-### 3. Initialize Project Structure
+#### Test Deployed Contract
 ```bash
-# Create smart contracts workspace
-sc-meta new --template empty stardust-contracts
+# Test hello endpoint
+mxpy contract call <contract-address> --function=hello --pem=stardust-wallet.pem --gas-limit=5000000 --proxy=https://devnet-gateway.multiversx.com --send
 
-# Install dependencies
+# Test version endpoint
+mxpy contract call <contract-address> --function=get_version --pem=stardust-wallet.pem --gas-limit=5000000 --proxy=https://devnet-gateway.multiversx.com --send
+
+# Query contract (read-only)
+mxpy contract query <contract-address> --function=hello --proxy=https://devnet-api.multiversx.com
+```
+
+### 4. Development Workflow
+
+#### Add New Endpoints
+1. Edit `stardust-contracts/src/stardust_contracts.rs`
+2. Add your endpoint functions
+3. Build and test locally:
+```bash
 cargo build
+sc-meta all build
+cargo test
 ```
 
-### 4. Local Development
+#### Deploy Updates
 ```bash
-# Start local testnet (in container)
-mxpy localnet setup
-mxpy localnet start
+# Build new WASM
+sc-meta all build
 
-# Deploy contracts
-cd stardust-contracts
-mxpy contract deploy --bytecode=output/contract.wasm --recall-nonce
+# Deploy upgrade
+mxpy contract upgrade <contract-address> --bytecode=output/stardust-contracts.wasm --pem=stardust-wallet.pem --gas-limit=60000000 --send
 ```
 
 ## 📁 Project Structure
 
 ```
-StardustEngine/
+{{ ... }}
 ├── contracts/                 # Smart contracts (Rust)
 │   ├── game-assets/          # NFT and token contracts
 │   ├── marketplace/          # Trading and auction contracts
@@ -103,11 +129,11 @@ StardustEngine/
 
 ## 🎯 Roadmap
 
-### Phase 1: Foundation (Q4 2025)
-- [ ] Core smart contracts (NFTs, Tokens, Marketplace)
-- [ ] Basic SDK and API
-- [ ] Local development environment
-- [ ] Documentation and tutorials
+### Phase 1: Foundation (Q4 2025) ✅ **COMPLETED**
+- [x] **Core smart contracts** - Basic contract with hello/get_version endpoints deployed
+- [x] **Local development environment** - Docker setup with MultiversX tools
+- [x] **Documentation and tutorials** - Complete setup and deployment guide
+- [x] **Testnet deployment** - Contract successfully deployed on MultiversX devnet
 
 ### Phase 2: Gaming Features (Q1 2026)
 - [ ] Cross-game asset system
