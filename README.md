@@ -1,10 +1,6 @@
 # 🌟 StardustEngine
 
-> **Gaming Infrastructure on MultiversX** - Blockchain-powered gaming platform with smart contracts, NFT integration, and cross-game asset management
-
-[![MultiversX](https://img.shields.io/badge/MultiversX-Blockchain-blue)](https://multiversx.com/)
-[![Rust](https://img.shields.io/badge/Rust-Smart_Contracts-orange)](https://rust-lang.org/)
-[![Gaming](https://img.shields.io/badge/Gaming-Infrastructure-purple)](https://github.com/Gzeu/StardustEngine)
+**Gaming Infrastructure on MultiversX** - Blockchain-powered gaming platform with smart contracts, NFT integration, and cross-game asset management
 
 ## 🎮 Overview
 
@@ -13,61 +9,66 @@ StardustEngine is a comprehensive gaming infrastructure built on MultiversX bloc
 ## ✨ Key Features
 
 ### 🏗️ Infrastructure Components
+
 - **Smart Contract Suite** - Pre-built gaming contracts (NFTs, tokens, marketplace)
 - **Cross-Game Assets** - Interoperable items and characters across multiple games
 - **Economic Engine** - In-game economies with real value exchange
+- **Modern React Frontend** - Professional Web3 gaming dashboard with animations
 
 ### 🎯 Gaming Features
-- **NFT Gaming Assets** - weapons, characters, skins as tradeable NFTs
-- **Achievement System** - Blockchain-verified accomplishments and badges
-- **Frontend Dashboard (Port 3000)**
-- **Status**: ✅ Running on `http://localhost:3000/dashboard.html`
-- **Technology**: Modern HTML + JavaScript + CSS (React-like architecture)
-- **Features**:
-  - **State Management**: React-like state handling with real-time updates
-  - **Component Architecture**: Modular design with reusable UI components
-  - **Interactive Dashboard**: Professional gaming infrastructure interface
-  - **Real-time Testing**: Live contract interaction with visual feedback
-  - **Keyboard Shortcuts**: H (hello), V (version), I (info)
-  - **Responsive Grid Layout**: Modern CSS Grid with mobile support
-  - **Statistics Display**: Contract metrics and performance indicators
-  - **Error Handling**: Comprehensive error states and loading indicators
-### 🎯 Gaming Features
+
 - **NFT Gaming Assets** - Weapons, characters, skins as tradeable NFTs
 - **Achievement System** - Blockchain-verified accomplishments and badges
 - **Tournament Platform** - Competitive gaming with crypto rewards
 - **Guild Management** - Decentralized gaming communities
 
 ### 🔧 Developer Tools
+
 - **SDK & APIs** - Easy integration for game developers
 - **Asset Creator** - Tools for designing and minting game assets
 - **Analytics Dashboard** - Real-time game metrics and player insights
 
+### 🌐 Frontend Features
+
+- **React + Next.js 14** - Modern App Router with server-side rendering
+- **TypeScript** - Full type safety and developer experience
+- **Tailwind CSS** - Custom gaming theme with animations
+- **Framer Motion** - Smooth animations and interactions
+- **MultiversX Integration** - Seamless wallet connection and contract interaction
+- **Responsive Design** - Mobile-first approach with desktop optimization
+- **Real-time Dashboard** - Live contract monitoring and interaction
+
 ## 🛠️ Tech Stack
 
-| Component | Technology |
-|-----------|------------|
-| Blockchain | MultiversX (eGLD) |
-| Smart Contracts | Rust |
-| Backend API | FastAPI (Python) |
-| Frontend | Modern HTML + JavaScript + CSS (React-like) |
-| Database | MongoDB |
-| Storage | IPFS |
-| Testing | Rust + Jest |
+|Component|Technology|
+|--|--|
+|Blockchain|MultiversX (eGLD)|
+|Smart Contracts|Rust|
+|Backend API|FastAPI (Python)|
+|Frontend|React + Next.js 14 + TypeScript|
+|Styling|Tailwind CSS + Framer Motion|
+|Database|MongoDB|
+|Storage|IPFS|
+|Testing|Rust + Jest|
 
 ## 🚀 Quick Start
+
 ### Prerequisites
+
 - Docker Desktop installed and running
 - Git installed
+- Node.js 18+ and npm 9+ (for frontend)
 - MultiversX CLI tools (mxpy)
 
 ### 1. Clone Repository
+
 ```bash
 git clone https://github.com/Gzeu/StardustEngine.git
 cd StardustEngine
 ```
 
 ### 2. Start Development Environment
+
 ```bash
 # Option A: Use Docker development environment
 docker run --rm -it -v "$(pwd):/workspace" -p 8080:8080 -p 3000:3000 -p 8000:8000 multiversx/devcontainer-smart-contracts-rust:latest bash
@@ -79,6 +80,7 @@ docker run --rm -it -v "$(pwd):/workspace" -p 8080:8080 -p 3000:3000 -p 8000:800
 ### 3. Deploy to MultiversX Devnet
 
 #### Automatic Deployment (Recommended)
+
 ```bash
 # Inside Docker container
 cd /workspace
@@ -93,67 +95,124 @@ mxpy faucet request --pem=stardust-wallet.pem --wallet-url=https://devnet-wallet
 mxpy contract deploy --bytecode=stardust-contracts/output/stardust-contracts.wasm --pem=stardust-wallet.pem --gas-limit=60000000 --proxy=https://devnet-gateway.multiversx.com --send
 ```
 
-#### Test Deployed Contract
+### 4. Start Modern Frontend
+
 ```bash
-# Test hello endpoint
-mxpy contract call <contract-address> --function=hello --pem=stardust-wallet.pem --gas-limit=5000000 --proxy=https://devnet-gateway.multiversx.com --send
+# Navigate to frontend directory
+cd frontend
 
-# Test version endpoint
-mxpy contract call <contract-address> --function=get_version --pem=stardust-wallet.pem --gas-limit=5000000 --proxy=https://devnet-gateway.multiversx.com --send
+# Install dependencies
+npm install
 
-# Query contract (read-only)
-mxpy contract query <contract-address> --function=hello --proxy=https://devnet-api.multiversx.com
+# Create environment file
+cp .env.example .env.local
+
+# Start development server
+npm run dev
 ```
 
-### 4. Development Workflow
+The frontend will be available at `http://localhost:3000` with:
+- 🎨 Modern React dashboard with animations
+- 🔗 MultiversX wallet integration
+- 📊 Real-time contract interaction
+- 🎮 Gaming features showcase
+- 📱 Responsive mobile design
 
-#### Add New Endpoints
-1. Edit `stardust-contracts/src/stardust_contracts.rs`
-2. Add your endpoint functions
-3. Build and test locally:
+### 5. Start Backend API (Optional)
+
 ```bash
-cargo build
-sc-meta all build
-cargo test
-```
-
-#### Deploy Updates
-```bash
-# Build new WASM
-sc-meta all build
-
-# Deploy upgrade
-mxpy contract upgrade <contract-address> --bytecode=output/stardust-contracts.wasm --pem=stardust-wallet.pem --gas-limit=60000000 --send
+# Start FastAPI backend
+cd api
+pip install -r requirements.txt
+uvicorn main:app --reload --port 8000
 ```
 
 ## 📁 Project Structure
 
 ```
-{{ ... }}
-├── contracts/                 # Smart contracts (Rust)
-│   ├── game-assets/          # NFT and token contracts
-│   ├── marketplace/          # Trading and auction contracts
-│   ├── tournaments/          # Competition and rewards
-│   └── guilds/              # Guild management
-├── sdk/                      # JavaScript/TypeScript SDK
-├── api/                      # Backend API (FastAPI)
-├── frontend/                 # React dashboard
-├── docs/                     # Documentation
-├── scripts/                  # Deployment and utility scripts
-└── tests/                    # Test suites
+StardustEngine/
+├── frontend/                 # Modern React Frontend
+│   ├── src/
+│   │   ├── app/             # Next.js App Router
+│   │   │   ├── page.tsx     # Main homepage
+│   │   │   ├── layout.tsx   # Root layout
+│   │   │   └── globals.css  # Global styles
+│   │   ├── components/      # React components
+│   │   │   ├── ContractDashboard.tsx
+│   │   │   ├── GameShowcase.tsx
+│   │   │   ├── WalletConnect.tsx
+│   │   │   ├── StatsGrid.tsx
+│   │   │   └── ui/          # UI components
+│   │   └── types/           # TypeScript types
+│   ├── tailwind.config.ts   # Tailwind configuration
+│   ├── next.config.js       # Next.js configuration
+│   └── package.json         # Dependencies
+├── stardust-contracts/       # Smart contracts (Rust)
+│   ├── src/
+│   │   └── stardust_contracts.rs
+│   └── output/              # Compiled WASM
+├── api/                     # Backend API (FastAPI)
+├── docs/                    # Documentation
+├── scripts/                 # Deployment scripts
+└── tests/                   # Test suites
+```
 
-## 🎯 roadmap
+## 🎯 Frontend Development
+
+### Available Scripts
+
+```bash
+# Development
+npm run dev          # Start development server (localhost:3000)
+npm run build        # Build for production
+npm run start        # Start production server
+
+# Code Quality
+npm run lint         # Run ESLint
+npm run typecheck    # TypeScript type checking
+npm run format       # Format with Prettier
+
+# Testing
+npm run test         # Run tests
+npm run test:watch   # Run tests in watch mode
+```
+
+### Key Frontend Features
+
+#### 🎨 Modern UI Components
+- **ContractDashboard** - Interactive smart contract testing
+- **WalletConnect** - MultiversX wallet integration with dropdown
+- **GameShowcase** - Animated game cards with hover effects
+- **StatsGrid** - Real-time platform statistics
+- **NetworkStatus** - Connection status indicators
+
+#### ⚡ Animations & Effects
+- **Framer Motion** - Smooth page transitions and micro-interactions
+- **Glass Morphism** - Modern backdrop blur effects
+- **Gradient Animations** - Dynamic color transitions
+- **Hover Effects** - Interactive card animations
+- **Loading States** - Engaging loading indicators
+
+#### 📱 Responsive Design
+- **Mobile-First** - Optimized for mobile devices
+- **Tablet Support** - Adaptive layouts for tablets
+- **Desktop Enhanced** - Rich desktop experience
+- **Touch Interactions** - Mobile-friendly touch targets
+
+## 🎯 Roadmap
 
 ### Phase 1: Foundation (Q4 2025) ✅ **COMPLETED**
 - [x] **Core smart contracts** - Basic contract with hello/get_version endpoints deployed
-- [x] **Local development environment** - Docker setup with MultiversX tools
+- [x] **Modern React Frontend** - Professional dashboard with animations
+- [x] **MultiversX Integration** - Wallet connection and contract interaction
 - [x] **Docker setup with MultiversX tools**
 - [x] **Documentation and tutorials** - Complete setup and deployment guide
 - [x] **Testnet deployment** - Contract successfully deployed on MultiversX devnet
 
 ### Phase 2: Gaming Features (Q1 2026)
+- [ ] NFT asset system with minting and trading
 - [ ] Cross-game asset system
-{{ ... }}
+- [ ] Achievement and reward mechanisms
 - [ ] Tournament platform
 - [ ] Guild management system
 
@@ -168,6 +227,28 @@ mxpy contract upgrade <contract-address> --bytecode=output/stardust-contracts.wa
 - [ ] AI-powered game balancing
 - [ ] Advanced DeFi gaming mechanics
 - [ ] Community governance
+
+## 🚀 Deployment
+
+### Frontend Deployment (Vercel)
+
+```bash
+# Install Vercel CLI
+npm i -g vercel
+
+# Deploy from frontend directory
+cd frontend
+vercel
+```
+
+### Environment Variables
+
+```env
+# Frontend (.env.local)
+NEXT_PUBLIC_MULTIVERSX_NETWORK=devnet
+NEXT_PUBLIC_CONTRACT_ADDRESS=erd1qqqqqqqqqqqqqpgqfm0kd3wse7ddgtf4haplm3p5mdl90msp634qxrfmt3
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
+```
 
 ## 🤝 Contributing
 
@@ -186,7 +267,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🔗 Links
 
 - **Repository**: [github.com/Gzeu/StardustEngine](https://github.com/Gzeu/StardustEngine)
+- **Live Frontend**: Access via `npm run dev` in the frontend directory
 - **MultiversX Docs**: [docs.multiversx.com](https://docs.multiversx.com)
+- **Next.js Docs**: [nextjs.org/docs](https://nextjs.org/docs)
 - **Discord**: [Join our community](#)
 - **Twitter**: [@StardustEngine](#)
 
