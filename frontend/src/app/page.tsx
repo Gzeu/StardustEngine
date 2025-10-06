@@ -13,7 +13,9 @@ import {
   Globe,
   Play,
   Pause,
-  RefreshCw
+  RefreshCw,
+  Swords,
+  Crown
 } from 'lucide-react';
 
 import ContractDashboard from '../components/ContractDashboard';
@@ -22,6 +24,8 @@ import StatsGrid from '../components/StatsGrid';
 import GameShowcase from '../components/GameShowcase';
 import WalletConnect from '../components/WalletConnect';
 import NetworkStatus from '../components/NetworkStatus';
+import GameContract from '../components/GameContract';
+import HologramDemo from '../components/HologramDemo';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -69,34 +73,35 @@ export default function HomePage() {
   const features = [
     {
       icon: <Gamepad2 className="h-8 w-8" />,
-      title: 'Gaming Infrastructure',
-      description: 'Complete blockchain gaming platform with smart contracts, NFTs, and cross-game compatibility',
+      title: 'NFT Gaming Assets',
+      description: 'Mint, trade, and upgrade unique gaming assets as blockchain NFTs with true ownership',
       gradient: 'from-blue-500 to-purple-600'
     },
     {
-      icon: <Zap className="h-8 w-8" />,
-      title: 'Lightning Fast',
-      description: 'Built on MultiversX for instant transactions and seamless gaming experiences',
-      gradient: 'from-yellow-400 to-orange-500'
+      icon: <Swords className="h-8 w-8" />,
+      title: 'Cross-Game Items',
+      description: 'Use your weapons, characters, and items across multiple games in the StardustEngine ecosystem',
+      gradient: 'from-red-500 to-orange-500'
     },
     {
       icon: <Trophy className="h-8 w-8" />,
       title: 'Tournaments & Rewards',
-      description: 'Competitive gaming with crypto rewards, achievements, and leaderboards',
+      description: 'Compete in tournaments, earn achievements, and win EGLD prizes in epic gaming competitions',
       gradient: 'from-green-400 to-blue-500'
     },
     {
-      icon: <Users className="h-8 w-8" />,
-      title: 'Guild System',
-      description: 'Decentralized gaming communities with governance and shared assets',
+      icon: <Crown className="h-8 w-8" />,
+      title: 'Player Progression',
+      description: 'Level up your character, gain experience, and unlock exclusive achievements and rewards',
       gradient: 'from-purple-400 to-pink-500'
     }
   ];
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: <Globe className="h-4 w-4" /> },
-    { id: 'dashboard', label: 'Dashboard', icon: <Code2 className="h-4 w-4" /> },
-    { id: 'games', label: 'Games', icon: <Gamepad2 className="h-4 w-4" /> },
+    { id: 'gaming', label: 'Gaming Platform', icon: <Gamepad2 className="h-4 w-4" /> },
+    { id: 'hologram', label: 'Hologram Demo', icon: <Zap className="h-4 w-4" /> },
+    { id: 'dashboard', label: 'Smart Contracts', icon: <Code2 className="h-4 w-4" /> },
     { id: 'wallet', label: 'Wallet', icon: <Wallet className="h-4 w-4" /> }
   ];
 
@@ -123,7 +128,7 @@ export default function HomePage() {
                 🌟 StardustEngine
               </div>
               <div className="hidden sm:block text-sm text-gray-300">
-                Gaming Infrastructure on MultiversX
+                NFT Gaming Platform on MultiversX
               </div>
             </motion.div>
             
@@ -181,23 +186,29 @@ export default function HomePage() {
                 {/* Hero Section */}
                 <motion.section variants={itemVariants} className="text-center py-12">
                   <h1 className="text-5xl font-bold text-white mb-6">
-                    Build the Future of
+                    Next-Generation
                     <span className="block bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-                      Blockchain Gaming
+                      NFT Gaming Platform
                     </span>
                   </h1>
                   <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
-                    StardustEngine provides developers with the complete infrastructure needed to build 
-                    next-generation Web3 games with true asset ownership, cross-game compatibility, and 
-                    decentralized economies.
+                    StardustEngine combines cutting-edge blockchain technology with spectacular gaming experiences. 
+                    Mint NFT assets, compete in tournaments, and build your gaming legacy on MultiversX.
                   </p>
                   <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                    <button className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 flex items-center justify-center">
-                      Get Started
+                    <button 
+                      onClick={() => setActiveTab('gaming')}
+                      className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 flex items-center justify-center"
+                    >
+                      Start Gaming
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </button>
-                    <button className="px-8 py-3 border border-gray-600 text-gray-300 font-semibold rounded-lg hover:bg-gray-800 transition-all duration-200">
-                      View Documentation
+                    <button 
+                      onClick={() => setActiveTab('hologram')}
+                      className="px-8 py-3 border border-gray-600 text-gray-300 font-semibold rounded-lg hover:bg-gray-800 transition-all duration-200 flex items-center justify-center"
+                    >
+                      View Hologram Demo
+                      <Zap className="ml-2 h-4 w-4" />
                     </button>
                   </div>
                 </motion.section>
@@ -210,7 +221,7 @@ export default function HomePage() {
                 {/* Features Grid */}
                 <motion.section variants={itemVariants}>
                   <h2 className="text-3xl font-bold text-white text-center mb-12">
-                    Powerful Features for Web3 Gaming
+                    Revolutionary Gaming Features
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                     {features.map((feature, index) => (
@@ -226,21 +237,63 @@ export default function HomePage() {
               </motion.div>
             )}
 
-            {activeTab === 'dashboard' && (
-              <ContractDashboard isConnected={isConnected} />
+            {activeTab === 'gaming' && (
+              <motion.div
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+                className="space-y-8"
+              >
+                <motion.div variants={itemVariants} className="text-center mb-8">
+                  <h1 className="text-4xl font-bold text-white mb-4 flex items-center justify-center">
+                    <Gamepad2 className="mr-3 h-10 w-10 text-blue-400" />
+                    Gaming Platform
+                  </h1>
+                  <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+                    Experience the future of blockchain gaming with NFT assets, tournaments, and player progression.
+                  </p>
+                </motion.div>
+                <motion.div variants={itemVariants}>
+                  <GameContract />
+                </motion.div>
+              </motion.div>
             )}
 
-            {activeTab === 'games' && (
-              <div className="text-center py-20">
-                <Gamepad2 className="h-20 w-20 text-gray-400 mx-auto mb-6" />
-                <h2 className="text-2xl font-bold text-white mb-4">Games Coming Soon</h2>
-                <p className="text-gray-400 mb-8 max-w-md mx-auto">
-                  Our first batch of Web3 games is currently in development. Stay tuned for epic gaming experiences!
-                </p>
-                <button className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-200">
-                  Join Waitlist
-                </button>
-              </div>
+            {activeTab === 'hologram' && (
+              <motion.div
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+                className="space-y-8"
+              >
+                <motion.div variants={itemVariants} className="text-center mb-8">
+                  <h1 className="text-4xl font-bold text-white mb-4 flex items-center justify-center">
+                    <Zap className="mr-3 h-10 w-10 text-purple-400" />
+                    Hologram Technology Demo
+                  </h1>
+                  <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+                    Experience our cutting-edge holographic interface technology with 3D effects and particle systems.
+                  </p>
+                </motion.div>
+                <motion.div variants={itemVariants}>
+                  <HologramDemo />
+                </motion.div>
+              </motion.div>
+            )}
+
+            {activeTab === 'dashboard' && (
+              <motion.div variants={itemVariants}>
+                <div className="text-center mb-8">
+                  <h1 className="text-4xl font-bold text-white mb-4 flex items-center justify-center">
+                    <Code2 className="mr-3 h-10 w-10 text-green-400" />
+                    Smart Contract Dashboard
+                  </h1>
+                  <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+                    Interact directly with StardustEngine smart contracts and explore blockchain functionality.
+                  </p>
+                </div>
+                <ContractDashboard isConnected={isConnected} />
+              </motion.div>
             )}
 
             {activeTab === 'wallet' && (
@@ -263,6 +316,17 @@ export default function HomePage() {
                     variant="large"
                   />
                 )}
+                {isConnected && (
+                  <div className="mt-8">
+                    <button 
+                      onClick={() => setActiveTab('gaming')}
+                      className="px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-200 flex items-center justify-center mx-auto"
+                    >
+                      Access Gaming Platform
+                      <Gamepad2 className="ml-2 h-4 w-4" />
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </motion.div>
@@ -274,7 +338,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center text-gray-400">
             <p className="mb-2">🚀 Built with MultiversX Smart Contracts</p>
-            <p>🔗 Powered by React + TypeScript + Tailwind CSS</p>
+            <p>🎮 Powered by React + TypeScript + Framer Motion</p>
             <p className="mt-4 text-sm">
               © 2025 StardustEngine. Built with ❤️ by{' '}
               <a href="https://github.com/Gzeu" className="text-blue-400 hover:text-blue-300 transition-colors">
