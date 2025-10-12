@@ -95,7 +95,7 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "framework": "nextjs",
-  "installCommand": "npm ci",
+  "installCommand": "npm install",
   "buildCommand": "npm run build:vercel",
   "devCommand": "npm run dev",
   "outputDirectory": ".next",
