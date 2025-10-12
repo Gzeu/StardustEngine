@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useGetLoginInfo, useGetAccountInfo } from '@multiversx/sdk-dapp/hooks';
 import { sendTransactions } from '@multiversx/sdk-dapp/services';
 import { motion } from 'framer-motion';
+import { config, formatEGLD } from '../config';
 
 interface PlayerStats {
   level: number;
@@ -33,11 +34,12 @@ const rarityColors = {
   Legendary: 'from-yellow-600 to-yellow-700',
 };
 
+// Use centralized mint costs from config
 const rarityPrices = {
-  Common: '1',
-  Rare: '2', 
-  Epic: '5',
-  Legendary: '10',
+  Common: formatEGLD(config.mintCosts.common),
+  Rare: formatEGLD(config.mintCosts.rare),
+  Epic: formatEGLD(config.mintCosts.epic),
+  Legendary: formatEGLD(config.mintCosts.legendary),
 };
 
 const assetTypes = ['Weapon', 'Character', 'Skin', 'Consumable', 'Vehicle', 'Structure'];
@@ -54,7 +56,8 @@ export const GameContract = () => {
   const [assetDescription, setAssetDescription] = useState('');
   const [showMintForm, setShowMintForm] = useState(false);
 
-  const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || 'erd1qqqqqqqqqqqqqpgqmhm6kg3mj3k0w9a3nda9xuw4tac3n5zx2jps8rp6sd';
+  // Use contract address from centralized config
+  const contractAddress = config.contract.address;
 
   useEffect(() => {
     if (isLoggedIn && address) {
@@ -72,41 +75,67 @@ export const GameContract = () => {
   const loadPlayerData = async () => {
     if (!isRegistered) return;
     
-    // Load player stats and assets
-    // These would be actual contract queries
-    setPlayerStats({
-      level: 5,
-      experience: 1250,
-      games_played: 25,
-      games_won: 18,
-      assets_owned: 7,
-      achievements: ['First Blood', 'Asset Collector', 'Tournament Winner']
-    });
+    try {
+      // Load player stats from API or contract
+      const response = await fetch(`${config.externalServices.apiBaseUrl}/api/player/${address}`);
+      if (response.ok) {
+        const data = await response.json();
+        setPlayerStats(data.stats);
+        setPlayerAssets(data.assets);
+      } else {
+        // Fallback to mock data for development
+        if (config.app.devMode) {
+          setPlayerStats({
+            level: 5,
+            experience: 1250,
+            games_played: 25,
+            games_won: 18,
+            assets_owned: 7,
+            achievements: ['First Blood', 'Asset Collector', 'Tournament Winner']
+          });
 
-    setPlayerAssets([
-      {
-        id: 1,
-        owner: address || '',
-        asset_type: 'Weapon',
-        rarity: 'Epic',
-        name: 'Dragon Slayer',
-        description: 'A legendary sword forged in dragon fire',
-        created_at: Date.now(),
-        level: 3,
-        experience: 450
-      },
-      {
-        id: 2,
-        owner: address || '',
-        asset_type: 'Character',
-        rarity: 'Rare',
-        name: 'Shadow Warrior',
-        description: 'Master of stealth and combat',
-        created_at: Date.now(),
-        level: 2,
-        experience: 200
+          setPlayerAssets([
+            {
+              id: 1,
+              owner: address || '',
+              asset_type: 'Weapon',
+              rarity: 'Epic',
+              name: 'Dragon Slayer',
+              description: 'A legendary sword forged in dragon fire',
+              created_at: Date.now(),
+              level: 3,
+              experience: 450
+            },
+            {
+              id: 2,
+              owner: address || '',
+              asset_type: 'Character',
+              rarity: 'Rare',
+              name: 'Shadow Warrior',
+              description: 'Master of stealth and combat',
+              created_at: Date.now(),
+              level: 2,
+              experience: 200
+            }
+          ]);
+        }
       }
-    ]);
+    } catch (error) {
+      console.error('Failed to load player data:', error);
+      
+      // Fallback to mock data in case of API error
+      if (config.app.devMode) {
+        setPlayerStats({
+          level: 1,
+          experience: 0,
+          games_played: 0,
+          games_won: 0,
+          assets_owned: 0,
+          achievements: []
+        });
+        setPlayerAssets([]);
+      }
+    }
   };
 
   const registerPlayer = async () => {
@@ -118,7 +147,7 @@ export const GameContract = () => {
         value: '0',
         data: 'register_player',
         receiver: contractAddress,
-        gasLimit: 5000000,
+        gasLimit: config.gasLimits.register, // Use centralized gas limit
       };
 
       await sendTransactions({
@@ -131,6 +160,19 @@ export const GameContract = () => {
       });
 
       setIsRegistered(true);
+      
+      // Notify backend about registration
+      if (!config.app.devMode) {
+        try {
+          await fetch(`${config.externalServices.apiBaseUrl}/api/player/${address}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'register', address })
+          });
+        } catch (apiError) {
+          console.warn('Backend notification failed:', apiError);
+        }
+      }
     } catch (error) {
       console.error('Registration failed:', error);
     }
@@ -142,13 +184,15 @@ export const GameContract = () => {
     
     setLoading(true);
     try {
-      const value = (parseFloat(rarityPrices[rarity as keyof typeof rarityPrices]) * 1e18).toString();
+      // Get mint cost from centralized config
+      const mintCostKey = rarity.toLowerCase() as keyof typeof config.mintCosts;
+      const value = config.mintCosts[mintCostKey];
       
       const transaction = {
         value,
         data: `mint_game_asset@${Buffer.from(selectedAssetType).toString('hex')}@${Buffer.from(rarity).toString('hex')}@${Buffer.from(assetName).toString('hex')}@${Buffer.from(assetDescription).toString('hex')}`,
         receiver: contractAddress,
-        gasLimit: 15000000,
+        gasLimit: config.gasLimits.mint, // Use centralized gas limit
       };
 
       await sendTransactions({
@@ -164,6 +208,25 @@ export const GameContract = () => {
       setAssetName('');
       setAssetDescription('');
       setShowMintForm(false);
+      
+      // Notify backend about new asset
+      if (!config.app.devMode) {
+        try {
+          await fetch(`${config.externalServices.apiBaseUrl}/api/assets/${address}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              action: 'mint',
+              asset_type: selectedAssetType,
+              rarity,
+              name: assetName,
+              description: assetDescription
+            })
+          });
+        } catch (apiError) {
+          console.warn('Backend notification failed:', apiError);
+        }
+      }
       
       // Refresh player data
       setTimeout(() => loadPlayerData(), 2000);
@@ -183,7 +246,7 @@ export const GameContract = () => {
         <div className="text-6xl mb-4">🚀</div>
         <h3 className="text-2xl font-bold text-white mb-4">Connect Your Wallet</h3>
         <p className="text-gray-400 mb-6">
-          Connect your MultiversX wallet to access the StardustEngine gaming platform and start collecting NFT assets.
+          Connect your MultiversX wallet to access the {config.app.name} gaming platform and start collecting NFT assets.
         </p>
         <div className="inline-flex items-center space-x-2 text-blue-400">
           <span>Ready for Web3 Gaming</span>
@@ -194,6 +257,11 @@ export const GameContract = () => {
             ⚡
           </motion.div>
         </div>
+        {config.app.devMode && (
+          <div className="mt-4 text-xs text-yellow-400 bg-yellow-400/10 px-3 py-2 rounded-lg">
+            🔧 Development Mode: Using mock data and fallbacks
+          </div>
+        )}
       </motion.div>
     );
   }
@@ -206,9 +274,9 @@ export const GameContract = () => {
         className="text-center p-8 bg-gradient-to-br from-purple-900/20 to-blue-900/20 backdrop-blur-sm rounded-xl border border-purple-500/30"
       >
         <div className="text-6xl mb-4">🎮</div>
-        <h3 className="text-3xl font-bold text-white mb-4">Welcome to StardustEngine!</h3>
+        <h3 className="text-3xl font-bold text-white mb-4">Welcome to {config.app.name}!</h3>
         <p className="text-gray-300 mb-6 max-w-md mx-auto">
-          Join the next generation of NFT gaming. Register now to start collecting assets, 
+          {config.app.description}. Register now to start collecting assets, 
           leveling up, and competing in tournaments.
         </p>
         <motion.button 
@@ -252,7 +320,7 @@ export const GameContract = () => {
               { label: 'Experience', value: playerStats.experience.toLocaleString(), icon: '💎', color: 'text-blue-400' },
               { label: 'Games Played', value: playerStats.games_played, icon: '🎯', color: 'text-green-400' },
               { label: 'Games Won', value: playerStats.games_won, icon: '🏆', color: 'text-purple-400' },
-              { label: 'Win Rate', value: `${Math.round((playerStats.games_won / playerStats.games_played) * 100)}%`, icon: '📊', color: 'text-orange-400' },
+              { label: 'Win Rate', value: `${Math.round((playerStats.games_won / Math.max(playerStats.games_played, 1)) * 100)}%`, icon: '📊', color: 'text-orange-400' },
               { label: 'Assets', value: playerStats.assets_owned, icon: '🎴', color: 'text-red-400' }
             ].map((stat, index) => (
               <motion.div 
