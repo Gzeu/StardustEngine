@@ -3,7 +3,7 @@
 # 🚀 StardustEngine Free-Tier Deployment Script
 # Automated deployment across multiple free services
 # Author: George Pricop
-# Version: 2.0.0
+# Version: 2.0.1
 
 set -e  # Exit on any error
 
@@ -84,7 +84,7 @@ NEXT_PUBLIC_GATEWAY_URL=$GATEWAY_URL
 NEXT_PUBLIC_API_URL=https://devnet-api.multiversx.com
 NEXT_PUBLIC_EXPLORER_URL=$EXPLORER_URL
 NEXT_PUBLIC_BASE_PATH=
-NEXT_PUBLIC_APP_VERSION=2.0.0
+NEXT_PUBLIC_APP_VERSION=2.0.1
 EOF
 
     # GitHub Pages environment
@@ -95,7 +95,7 @@ NEXT_PUBLIC_GATEWAY_URL=$GATEWAY_URL
 NEXT_PUBLIC_API_URL=https://devnet-api.multiversx.com
 NEXT_PUBLIC_EXPLORER_URL=$EXPLORER_URL
 NEXT_PUBLIC_BASE_PATH=/StardustEngine
-NEXT_PUBLIC_APP_VERSION=2.0.0
+NEXT_PUBLIC_APP_VERSION=2.0.1
 EOF
 
     cd ..
@@ -256,6 +256,26 @@ deploy_github_pages() {
     cd ..
 }
 
+deploy_render_api() {
+    print_step "Setting up Render API deployment..."
+    
+    echo "ℹ️  Render API Setup Instructions:"
+    echo "   1. Visit https://render.com and create account"
+    echo "   2. Connect your GitHub repository"
+    echo "   3. Create new Web Service"
+    echo "   4. Set build command: pip install -r requirements.txt"
+    echo "   5. Set start command: uvicorn main:app --host 0.0.0.0 --port \$PORT"
+    echo "   6. Add environment variables:"
+    echo "      - DATABASE_URL (from Neon)"
+    echo "      - REDIS_URL (from Upstash)"
+    echo "      - MULTIVERSX_GATEWAY_URL=$GATEWAY_URL"
+    echo ""
+    echo "🌐 Your API will be available at: https://stardustengine-api.onrender.com"
+    echo "📚 Documentation: https://render.com/docs/web-services"
+    
+    print_success "Render API setup instructions provided"
+}
+
 run_health_checks() {
     print_step "Running health checks..."
     
@@ -305,17 +325,28 @@ print_summary() {
     echo "  ✅ Holographic UI Effects"
     echo ""
     
-    echo -e "${YELLOW}📊 Monitoring:${NC}"
-    echo "  • Uptime: UptimeRobot (setup required)"
+    echo -e "${YELLOW}🔧 API Backend Setup:${NC}"
+    echo "  • Render: Manual setup required (free 750h/month)"
+    echo "  • Database: Neon PostgreSQL (free 512MB)"
+    echo "  • Cache: Upstash Redis (free 10K req/day)"
+    echo ""
+    
+    echo -e "${YELLOW}📊 Monitoring Setup:${NC}"
+    echo "  • Uptime: UptimeRobot (50 monitors free)"
     echo "  • Analytics: Vercel Analytics (included)"
-    echo "  • Errors: Sentry (setup required)"
+    echo "  • Errors: Sentry (5K errors/month free)"
     echo ""
     
     echo -e "${BLUE}🚀 Next Steps:${NC}"
-    echo "  1. Setup custom domain (optional)"
-    echo "  2. Configure monitoring services"
-    echo "  3. Setup CI/CD with GitHub Actions"
-    echo "  4. Add SSL certificates (auto with Vercel)"
+    echo "  1. Setup Render API backend (manual)"
+    echo "  2. Configure Neon PostgreSQL database"
+    echo "  3. Setup Upstash Redis cache"
+    echo "  4. Configure monitoring services"
+    echo "  5. Setup custom domain (optional)"
+    echo ""
+    
+    echo -e "${GREEN}💰 Total Monthly Cost: \$0${NC}"
+    echo "  All services remain free until significant scale!"
     echo ""
 }
 
@@ -343,12 +374,25 @@ main() {
                 DEPLOY_TARGET="github"
                 shift
                 ;;
+            --api-setup)
+                DEPLOY_TARGET="api"
+                shift
+                ;;
             --help)
-                echo "Usage: $0 [--contracts-only|--frontend-only|--vercel-only|--github-only]"
+                echo "Usage: $0 [--contracts-only|--frontend-only|--vercel-only|--github-only|--api-setup]"
+                echo ""
+                echo "Options:"
+                echo "  --contracts-only  Deploy smart contracts to MultiversX DevNet"
+                echo "  --frontend-only   Deploy frontend to Vercel and GitHub Pages"
+                echo "  --vercel-only     Deploy frontend to Vercel only"
+                echo "  --github-only     Deploy frontend to GitHub Pages only"
+                echo "  --api-setup       Show API backend setup instructions"
+                echo "  --help            Show this help message"
                 exit 0
                 ;;
             *)
                 echo "Unknown option: $1"
+                echo "Use --help for available options"
                 exit 1
                 ;;
         esac
@@ -374,10 +418,14 @@ main() {
         "github")
             deploy_github_pages
             ;;
+        "api")
+            deploy_render_api
+            ;;
         "all")
             deploy_contracts
             deploy_vercel
             deploy_github_pages
+            deploy_render_api
             run_health_checks
             ;;
     esac
