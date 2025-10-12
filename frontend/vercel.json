@@ -12,12 +12,6 @@
       "NEXT_PUBLIC_BASE_PATH": ""
     }
   },
-  "functions": {
-    "app/api/**/*.js": {
-      "runtime": "nodejs20.x",
-      "maxDuration": 15
-    }
-  },
   "headers": [
     {
       "source": "/(.*)",
