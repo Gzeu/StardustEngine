@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useGetLoginInfo, useGetAccountInfo } from '@multiversx/sdk-dapp/hooks';
-import { sendTransactions } from '@multiversx/sdk-dapp/services';
+import { useGetLoginInfo, useGetAccountInfo, sendTransactions } from '@multiversx/sdk-dapp/hooks';
 import { motion } from 'framer-motion';
 import { config, formatEGLD } from '../config';
 
