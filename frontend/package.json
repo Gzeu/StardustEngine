@@ -5,17 +5,35 @@
   "description": "StardustEngine - Next-generation NFT Gaming Platform on MultiversX",
   "keywords": ["nft", "gaming", "multiversx", "blockchain", "web3"],
   "author": "George Pricop",
+  "homepage": "https://gzeu.github.io/StardustEngine",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Gzeu/StardustEngine.git",
+    "directory": "frontend"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:github": "GITHUB_PAGES=true NEXT_PUBLIC_BASE_PATH=/StardustEngine next build",
+    "build:vercel": "NEXT_PUBLIC_BASE_PATH= next build",
     "start": "next start",
+    "export": "next export",
+    "predeploy": "npm run build:github",
+    "deploy": "gh-pages -d out -t true",
+    "deploy:github": "npm run build:github && npm run export && gh-pages -d out -t true",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "type-check": "tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "analyze": "ANALYZE=true npm run build"
+    "analyze": "ANALYZE=true npm run build",
+    "analyze:server": "BUNDLE_ANALYZE=server npm run build",
+    "analyze:browser": "BUNDLE_ANALYZE=browser npm run build",
+    "clean": "rm -rf .next out node_modules/.cache",
+    "health-check": "curl -f http://localhost:3000/api/health || echo 'Health check failed'",
+    "size-limit": "size-limit",
+    "lighthouse": "lhci autorun"
   },
   "dependencies": {
     "@multiversx/sdk-core": "^12.24.0",
@@ -41,11 +59,15 @@
     "autoprefixer": "^10.4.16",
     "eslint": "^8.53.0",
     "eslint-config-next": "14.0.3",
+    "gh-pages": "^6.0.0",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
     "postcss": "^8.4.31",
+    "size-limit": "^10.0.1",
+    "@lhci/cli": "^0.12.0",
     "tailwindcss": "^3.3.5",
-    "typescript": "^5.2.2"
+    "typescript": "^5.2.2",
+    "webpack-bundle-analyzer": "^4.9.1"
   },
   "engines": {
     "node": ">=18.0.0",
@@ -61,6 +83,20 @@
       "last 1 chrome version",
       "last 1 firefox version",
       "last 1 safari version"
+    ]
+  },
+  "size-limit": [
+    {
+      "path": ".next/static/chunks/*.js",
+      "limit": "500 KB"
+    }
+  ],
+  "jest": {
+    "testEnvironment": "jsdom",
+    "setupFilesAfterEnv": ["<rootDir>/jest.setup.js"],
+    "collectCoverageFrom": [
+      "src/**/*.{js,jsx,ts,tsx}",
+      "!src/**/*.d.ts"
     ]
   }
 }

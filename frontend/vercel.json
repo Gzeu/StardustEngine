@@ -1,0 +1,107 @@
+{
+  "version": 2,
+  "name": "stardustengine",
+  "alias": ["stardustengine.vercel.app"],
+  "regions": ["iad1"],
+  "build": {
+    "env": {
+      "NEXT_PUBLIC_MULTIVERSX_NETWORK": "devnet",
+      "NEXT_PUBLIC_GATEWAY_URL": "https://devnet-gateway.multiversx.com",
+      "NEXT_PUBLIC_API_URL": "https://devnet-api.multiversx.com",
+      "NEXT_PUBLIC_EXPLORER_URL": "https://devnet-explorer.multiversx.com",
+      "NEXT_PUBLIC_BASE_PATH": ""
+    }
+  },
+  "functions": {
+    "app/api/**/*.js": {
+      "maxDuration": 10
+    }
+  },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=()"
+        }
+      ]
+    },
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, PUT, DELETE, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=300, s-maxage=300"
+        }
+      ]
+    },
+    {
+      "source": "/_next/static/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/health",
+      "destination": "/api/health"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/home",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/dashboard",
+      "destination": "/?tab=dashboard",
+      "permanent": false
+    }
+  ],
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "framework": "nextjs",
+  "installCommand": "npm ci",
+  "buildCommand": "npm run build:vercel",
+  "devCommand": "npm run dev",
+  "outputDirectory": ".next",
+  "public": true,
+  "github": {
+    "enabled": true,
+    "autoAlias": false
+  }
+}
