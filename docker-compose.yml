@@ -1,0 +1,161 @@
+version: '3.8'
+
+services:
+  # MultiversX Local Development Network
+  multiversx-localnet:
+    image: multiversx/localnet:latest
+    container_name: stardustengine-localnet
+    ports:
+      - "7950:7950"  # Gateway
+      - "9090:9090"  # API
+      - "8080:8080"  # Explorer
+    environment:
+      - LOCALNET_CONFIG=testnet
+    volumes:
+      - localnet_data:/data
+    networks:
+      - stardust-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7950/network/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Smart Contract Build Environment
+  contract-builder:
+    image: multiversx/sdk-rust-contract-builder:latest
+    container_name: stardustengine-builder
+    working_dir: /workspace
+    volumes:
+      - ./stardust-contracts:/workspace
+      - rust_cache:/usr/local/cargo/registry
+      - rust_target:/workspace/target
+    networks:
+      - stardust-network
+    command: tail -f /dev/null  # Keep container running
+    environment:
+      - RUST_BACKTRACE=1
+      - CARGO_TARGET_DIR=/workspace/target
+
+  # Frontend Development Server
+  frontend-dev:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+      target: development
+    container_name: stardustengine-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_MULTIVERSX_NETWORK=localnet
+      - NEXT_PUBLIC_GATEWAY_URL=http://localhost:7950
+      - NEXT_PUBLIC_API_URL=http://localhost:9090
+      - NEXT_PUBLIC_EXPLORER_URL=http://localhost:8080
+      - CHOKIDAR_USEPOLLING=true
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    networks:
+      - stardust-network
+    depends_on:
+      multiversx-localnet:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # API Backend (Optional)
+  api-backend:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: stardustengine-api
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/stardustengine
+      - MULTIVERSX_GATEWAY_URL=http://multiversx-localnet:7950
+      - REDIS_URL=redis://redis:6379
+    volumes:
+      - ./api:/app
+    networks:
+      - stardust-network
+    depends_on:
+      - postgres
+      - redis
+      - multiversx-localnet
+    restart: unless-stopped
+
+  # PostgreSQL Database (Free tier equivalent)
+  postgres:
+    image: postgres:15-alpine
+    container_name: stardustengine-db
+    environment:
+      - POSTGRES_DB=stardustengine
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - stardust-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis Cache (Free tier equivalent)
+  redis:
+    image: redis:7-alpine
+    container_name: stardustengine-cache
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - stardust-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru
+
+  # Monitoring with Prometheus (Optional)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: stardustengine-prometheus
+    ports:
+      - "9091:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    networks:
+      - stardust-network
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+
+volumes:
+  localnet_data:
+    driver: local
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  rust_cache:
+    driver: local
+  rust_target:
+    driver: local
+  prometheus_data:
+    driver: local
+
+networks:
+  stardust-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
