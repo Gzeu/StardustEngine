@@ -36,8 +36,8 @@
     "lighthouse": "lhci autorun"
   },
   "dependencies": {
-    "@multiversx/sdk-core": "^12.24.0",
-    "@multiversx/sdk-dapp": "^2.29.4",
+    "@multiversx/sdk-core": "^15.2.0",
+    "@multiversx/sdk-dapp": "^2.40.11",
     "@multiversx/sdk-network-providers": "^2.3.0",
     "@heroicons/react": "^2.0.18",
     "clsx": "^2.0.0",
@@ -70,7 +70,7 @@
     "webpack-bundle-analyzer": "^4.9.1"
   },
   "engines": {
-    "node": ">=18.0.0",
+    "node": ">=18.0.0 <21",
     "npm": ">=9.0.0"
   },
   "browserslist": {
