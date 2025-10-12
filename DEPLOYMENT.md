@@ -9,7 +9,7 @@
 | **Vercel** | Frontend Hosting | 100GB bandwidth/month | `npm run deploy:vercel` |
 | **GitHub Pages** | Static Hosting | 1GB storage | `npm run deploy:github` |
 | **MultiversX DevNet** | Smart Contracts | Unlimited (testnet) | `./deploy-contracts.sh` |
-| **Railway** | API Backend | 500h/month | `railway deploy` |
+| **Render** | API Backend | 750h/month | `render deploy` |
 | **Neon** | PostgreSQL | 512MB database | Auto-provision |
 | **Upstash** | Redis Cache | 10K requests/day | Auto-provision |
 
@@ -21,7 +21,6 @@
 ```bash
 # Required tools
 npm install -g vercel@latest
-npm install -g @railway/cli
 pip install multiversx-sdk-cli
 
 # Clone and setup
@@ -169,53 +168,102 @@ mxpy contract call $CONTRACT_ADDRESS \
 
 ## 🖥️ API Backend Deployment
 
-### Option 1: Railway (Recommended)
+### Option 1: Render (Recommended)
 
-**Why Railway:**
-- ✅ 500 hours/month free
-- ✅ Automatic deployments
-- ✅ Built-in PostgreSQL
-- ✅ Docker support
+**Why Render:**
+- ✅ 750 hours/month free (50% more than alternatives)
+- ✅ Automatic deployments from GitHub
+- ✅ Built-in PostgreSQL and Redis
+- ✅ Docker and static site support
+- ✅ Free SSL certificates
+- ✅ Global CDN included
 
 **Deploy Steps:**
 ```bash
-# 1. Install Railway CLI
-npm install -g @railway/cli
-
-# 2. Login and initialize
-railway login
-railway init
-
-# 3. Add PostgreSQL service
-railway add postgresql
-
-# 4. Deploy
-railway up
+# 1. Create account at render.com
+# 2. Connect GitHub repository
+# 3. Create new Web Service
+# 4. Configure build and start commands
 ```
 
-**Dockerfile for API:**
+**Render Configuration:**
+```yaml
+# render.yaml (optional)
+services:
+  - type: web
+    name: stardustengine-api
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: stardustengine-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: stardustengine-redis
+          type: redis
+          property: connectionString
+
+  - type: postgres
+    name: stardustengine-db
+    databaseName: stardustengine
+    user: stardustengine
+
+  - type: redis
+    name: stardustengine-redis
+    maxmemoryPolicy: allkeys-lru
+```
+
+**Dockerfile for Render:**
 ```dockerfile
 # api/Dockerfile
 FROM python:3.11-slim
 
 WORKDIR /app
+
+# Install dependencies
 COPY requirements.txt .
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
+# Copy application code
 COPY . .
-EXPOSE 8000
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Expose port (Render provides $PORT)
+EXPOSE $PORT
+
+# Start command
+CMD uvicorn main:app --host 0.0.0.0 --port $PORT
 ```
 
-### Option 2: Render (Alternative)
-
-**Free Tier:** 750 hours/month
-
+**Manual Deploy:**
 ```bash
-# Connect GitHub repo to Render
-# Set environment variables
-# Auto-deploy on git push
+# Connect GitHub repo to Render dashboard
+# Set environment variables in Render dashboard
+# Enable auto-deploy on git push
+```
+
+### Option 2: Vercel Serverless Functions
+
+**For simple API endpoints:**
+```python
+# api/index.py (Vercel Functions)
+from fastapi import FastAPI
+from vercel_asgi import VercelASGI
+
+app = FastAPI()
+
+@app.get("/api/health")
+async def health():
+    return {"status": "healthy"}
+
+@app.get("/api/player/{address}")
+async def get_player(address: str):
+    # MultiversX contract interaction
+    return {"player": address}
+
+app = VercelASGI(app)
 ```
 
 ---
@@ -228,6 +276,8 @@ CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 - ✅ 512MB database free
 - ✅ Serverless PostgreSQL
 - ✅ Branching for development
+- ✅ Automatic scaling
+- ✅ Point-in-time recovery
 
 **Setup:**
 ```bash
@@ -239,12 +289,42 @@ CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 DATABASE_URL=postgresql://user:pass@host/dbname?sslmode=require
 ```
 
+**Database Schema:**
+```sql
+-- Player stats table
+CREATE TABLE player_stats (
+    wallet_address VARCHAR(62) PRIMARY KEY,
+    level INTEGER DEFAULT 1,
+    experience BIGINT DEFAULT 0,
+    games_played INTEGER DEFAULT 0,
+    games_won INTEGER DEFAULT 0,
+    assets_owned INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Game assets cache
+CREATE TABLE game_assets (
+    asset_id BIGINT PRIMARY KEY,
+    owner_address VARCHAR(62) NOT NULL,
+    asset_type VARCHAR(50) NOT NULL,
+    rarity VARCHAR(20) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_assets_owner ON game_assets(owner_address);
+CREATE INDEX idx_assets_type ON game_assets(asset_type);
+```
+
 ### Upstash Redis (Free)
 
 **Features:**
 - ✅ 10,000 requests/day
 - ✅ 256MB storage
 - ✅ Global edge locations
+- ✅ REST API support
 
 **Setup:**
 ```bash
@@ -271,7 +351,7 @@ NEXT_PUBLIC_EXPLORER_URL=https://devnet-explorer.multiversx.com
 NEXT_PUBLIC_CONTRACT_ADDRESS=erd1qqqqqqqqqqqqqpgq...
 
 # API Configuration
-API_URL=https://your-api.railway.app
+API_URL=https://stardustengine-api.onrender.com
 DATABASE_URL=postgresql://...
 REDIS_URL=redis://...
 
@@ -287,7 +367,7 @@ VERCEL_TOKEN=your_vercel_token
 VERCEL_ORG_ID=your_org_id
 VERCEL_PROJECT_ID=your_project_id
 MULTIVERSX_WALLET_PEM=your_wallet_pem_content
-RAILWAY_TOKEN=your_railway_token
+RENDER_API_KEY=your_render_api_key
 ```
 
 ---
@@ -302,7 +382,7 @@ RAILWAY_TOKEN=your_railway_token
 # Monitor URLs:
 # - https://stardustengine.vercel.app
 # - https://gzeu.github.io/StardustEngine
-# - https://your-api.railway.app/health
+# - https://stardustengine-api.onrender.com/health
 ```
 
 **Error Tracking:**
@@ -330,6 +410,24 @@ export default function App({ Component, pageProps }) {
     </>
   )
 }
+```
+
+**Render Monitoring:**
+```python
+# Health check endpoint for monitoring
+from fastapi import FastAPI
+import time
+
+app = FastAPI()
+
+@app.get("/health")
+async def health_check():
+    return {
+        "status": "healthy",
+        "timestamp": time.time(),
+        "service": "stardustengine-api",
+        "version": "2.0.0"
+    }
 ```
 
 ---
@@ -371,13 +469,16 @@ images: {
 ```python
 # Optimize for free PostgreSQL limits
 from sqlalchemy import create_engine
+from sqlalchemy.pool import QueuePool
 
 engine = create_engine(
     DATABASE_URL,
-    pool_size=5,
-    max_overflow=0,
-    pool_pre_ping=True,
-    pool_recycle=300
+    poolclass=QueuePool,
+    pool_size=3,        # Optimized for Render free tier
+    max_overflow=2,
+    pool_timeout=30,
+    pool_recycle=300,   # 5 minutes
+    pool_pre_ping=True
 )
 ```
 
@@ -386,6 +487,9 @@ engine = create_engine(
 # Redis caching for API responses
 import redis
 from functools import wraps
+import json
+
+redis_client = redis.from_url(os.getenv("REDIS_URL"))
 
 def cache_response(expiration=3600):
     def decorator(func):
@@ -404,6 +508,33 @@ def cache_response(expiration=3600):
     return decorator
 ```
 
+**Render-Specific Optimizations:**
+```python
+# Optimize for Render's free tier limitations
+import os
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
+
+app = FastAPI()
+
+# Enable compression
+app.add_middleware(GZipMiddleware, minimum_size=1000)
+
+# CORS for frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Configure appropriately for production
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Keep-alive endpoint to prevent cold starts
+@app.get("/ping")
+async def ping():
+    return {"pong": True}
+```
+
 ---
 
 ## 🔄 CI/CD Pipeline
@@ -417,6 +548,16 @@ The included workflow (`.github/workflows/deploy-free-tier.yml`) provides:
 - ✅ **Environment Management:** Separate configs per target
 - ✅ **Health Checks:** Post-deployment verification
 - ✅ **Deployment Summary:** Detailed deployment report
+
+**Updated for Render:**
+```yaml
+# Deploy to Render (via webhook)
+- name: 🚀 Deploy to Render
+  run: |
+    curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" \
+      -H "Content-Type: application/json" \
+      -d '{"ref": "main"}'
+```
 
 **Trigger Deployment:**
 ```bash
@@ -457,6 +598,14 @@ mxpy account get --address=$YOUR_ADDRESS --proxy=https://devnet-gateway.multiver
 # Increase if deployment fails
 ```
 
+**Render Deployment Issues:**
+```bash
+# Check build logs in Render dashboard
+# Verify environment variables are set
+# Ensure requirements.txt is up to date
+# Check if port is configured correctly ($PORT)
+```
+
 **Vercel Deployment Issues:**
 ```bash
 # Check build output
@@ -477,18 +626,37 @@ vercel env ls
 - ✅ Implement code splitting for large components
 - ✅ Use React.lazy() for non-critical components
 
+**Render Cold Start Issues:**
+```python
+# Keep service warm with cron job or external pinger
+# Use UptimeRobot to ping every 5 minutes
+# Implement background tasks to maintain connection
+
+import asyncio
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+
+scheduler = AsyncIOScheduler()
+
+@scheduler.scheduled_job('interval', minutes=5)
+async def keep_warm():
+    # Simple database query to prevent connection timeout
+    pass
+
+scheduler.start()
+```
+
 **Database Connection Limits:**
 ```python
-# Implement connection pooling
+# Implement connection pooling optimized for Render
 from sqlalchemy.pool import QueuePool
 
 engine = create_engine(
     DATABASE_URL,
     poolclass=QueuePool,
-    pool_size=3,        # Reduced for free tier
-    max_overflow=2,
+    pool_size=2,        # Reduced for free tier
+    max_overflow=1,
     pool_timeout=30,
-    pool_recycle=1800
+    pool_recycle=1800   # 30 minutes
 )
 ```
 
@@ -499,9 +667,9 @@ engine = create_engine(
 ### When to Upgrade (Revenue Thresholds)
 
 | Metric | Free Tier Limit | Upgrade Trigger | Recommended Service |
-|--------|----------------|-----------------|--------------------|
+|--------|----------------|-----------------|--------------------||
 | **Bandwidth** | 100GB/month | >80GB usage | Vercel Pro ($20/month) |
-| **API Requests** | 10K/day | >8K daily | Railway Pro ($5/month) |
+| **API Hours** | 750h/month | >600h usage | Render Pro ($7/month) |
 | **Database** | 512MB | >400MB usage | Neon Pro ($19/month) |
 | **Build Minutes** | 6K/month | >5K usage | GitHub Pro ($4/month) |
 
@@ -512,17 +680,20 @@ engine = create_engine(
 - ✅ Optimize bundle sizes
 - ✅ Use CDN for static assets
 - ✅ Database query optimization
+- ✅ Keep Render services warm
 
 **Phase 2: Selective Upgrades ($100-$500 MRR)**
-- 🔄 Upgrade database to paid tier
+- 🔄 Upgrade to Render Pro ($7/month for better performance)
 - 🔄 Add Redis Pro for better caching
 - 🔄 Custom domain with Vercel Pro
+- 🔄 Upgrade database to Neon Pro
 
 **Phase 3: Full Production ($500+ MRR)**
-- 🔄 Move to dedicated infrastructure
-- 🔄 Implement microservices
-- 🔄 Add monitoring and alerting
+- 🔄 Move to dedicated infrastructure (AWS/GCP)
+- 🔄 Implement microservices architecture
+- 🔄 Add comprehensive monitoring and alerting
 - 🔄 Multi-region deployment
+- 🔄 Load balancing and auto-scaling
 
 ---
 
@@ -537,14 +708,16 @@ engine = create_engine(
 - **MultiversX Docs**: https://docs.multiversx.com/
 - **Vercel Docs**: https://vercel.com/docs
 - **Next.js Docs**: https://nextjs.org/docs
-- **Railway Docs**: https://docs.railway.app/
+- **Render Docs**: https://render.com/docs
+- **Neon Docs**: https://neon.tech/docs
 
 ### **Free Services**
 - **Vercel**: https://vercel.com/
 - **GitHub Pages**: https://pages.github.com/
-- **Railway**: https://railway.app/
+- **Render**: https://render.com/
 - **Neon**: https://neon.tech/
 - **Upstash**: https://upstash.com/
+- **UptimeRobot**: https://uptimerobot.com/
 
 ---
 
