@@ -1,0 +1,23 @@
+# StardustEngine API Backend
+# Optimized for Render.com free tier
+
+# Core Framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+
+# Database (Optional)
+asyncpg==0.29.0
+
+# Cache (Optional)  
+redis==5.0.1
+
+# MultiversX SDK (Optional)
+# multiversx-sdk-py==0.8.0
+
+# HTTP & Utils
+httpx==0.25.2
+python-multipart==0.0.6
+
+# Production
+gunicorn==21.2.0
