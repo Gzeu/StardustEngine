@@ -1,0 +1,28 @@
+{
+  "name": "stardustengine-api",
+  "version": "1.0.0",
+  "description": "StardustEngine Python API Backend",
+  "main": "main.py",
+  "scripts": {
+    "dev": "python -m uvicorn main:app --reload --host 0.0.0.0 --port 8000",
+    "start": "python -m uvicorn main:app --host 0.0.0.0 --port 8000",
+    "install": "pip install -r requirements.txt",
+    "install:dev": "pip install -r requirements.txt && pip install pytest black flake8",
+    "test": "python -m pytest",
+    "lint": "flake8 . && black --check .",
+    "lint:fix": "black .",
+    "clean": "find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true",
+    "health-check": "curl -f http://localhost:8000/health || echo 'API health check failed'"
+  },
+  "keywords": ["python", "fastapi", "multiversx", "blockchain", "api"],
+  "author": "George Pricop <pricopgeorge@gmail.com>",
+  "license": "MIT",
+  "engines": {
+    "python": ">=3.11.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Gzeu/StardustEngine.git",
+    "directory": "api"
+  }
+}
