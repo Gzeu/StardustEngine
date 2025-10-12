@@ -1,66 +1,32 @@
 /**
- * StardustEngine Configuration
- * Centralized management of environment variables and application settings
+ * StardustEngine Configuration with Robust Fallbacks
+ * Prevents runtime crashes when environment variables are missing
  */
 
-// Type definitions for configuration
-export interface NetworkConfig {
-  name: string;
-  chainId: string;
-  gatewayUrl: string;
-  apiUrl: string;
-  explorerUrl: string;
-  walletUrl: string;
-}
-
-export interface ContractConfig {
-  address: string;
-  testAddress?: string;
-}
-
-export interface GasLimits {
-  register: number;
-  mint: number;
-  transfer: number;
-  tournament: number;
-}
-
-export interface MintCosts {
-  common: string;
-  rare: string;
-  epic: string;
-  legendary: string;
-}
-
-export interface AppConfig {
-  name: string;
-  description: string;
-  version: string;
-  devMode: boolean;
-  debug: boolean;
-}
-
-// Environment variable getters with fallbacks
-const getEnvVar = (key: string, fallback?: string): string => {
+// Helper function for safe environment variable access
+const getEnvVar = (key: string, defaultValue: string): string => {
   const value = process.env[key];
-  if (!value && !fallback) {
-    console.warn(`Environment variable ${key} is not defined`);
+  if (value === undefined || value === null || value === '') {
+    return defaultValue;
   }
-  return value || fallback || '';
+  return value;
 };
 
-const getEnvBool = (key: string, fallback = false): boolean => {
+const getBoolEnvVar = (key: string, defaultValue: boolean = false): boolean => {
   const value = process.env[key];
-  return value ? value.toLowerCase() === 'true' : fallback;
+  if (!value) return defaultValue;
+  return value.toLowerCase() === 'true';
 };
 
-const getEnvNumber = (key: string, fallback = 0): number => {
+const getNumberEnvVar = (key: string, defaultValue: number): number => {
   const value = process.env[key];
-  return value ? parseInt(value, 10) : fallback;
+  if (!value) return defaultValue;
+  const parsed = parseInt(value, 10);
+  return isNaN(parsed) ? defaultValue : parsed;
 };
 
 // Network Configuration
-export const networkConfig: NetworkConfig = {
+export const networkConfig = {
   name: getEnvVar('NEXT_PUBLIC_MULTIVERSX_NETWORK', 'devnet'),
   chainId: getEnvVar('NEXT_PUBLIC_CHAIN_ID', 'D'),
   gatewayUrl: getEnvVar('NEXT_PUBLIC_GATEWAY_URL', 'https://devnet-gateway.multiversx.com'),
@@ -70,24 +36,24 @@ export const networkConfig: NetworkConfig = {
 };
 
 // Smart Contract Configuration
-export const contractConfig: ContractConfig = {
+export const contractConfig = {
   address: getEnvVar(
     'NEXT_PUBLIC_CONTRACT_ADDRESS',
     'erd1qqqqqqqqqqqqqpgqmhm6kg3mj3k0w9a3nda9xuw4tac3n5zx2jps8rp6sd'
   ),
-  testAddress: getEnvVar('NEXT_PUBLIC_TEST_CONTRACT_ADDRESS'),
+  testAddress: getEnvVar('NEXT_PUBLIC_TEST_CONTRACT_ADDRESS', ''),
 };
 
 // Gas Limits Configuration
-export const gasLimits: GasLimits = {
-  register: getEnvNumber('NEXT_PUBLIC_GAS_LIMIT_REGISTER', 5000000),
-  mint: getEnvNumber('NEXT_PUBLIC_GAS_LIMIT_MINT', 15000000),
-  transfer: getEnvNumber('NEXT_PUBLIC_GAS_LIMIT_TRANSFER', 10000000),
-  tournament: getEnvNumber('NEXT_PUBLIC_GAS_LIMIT_TOURNAMENT', 12000000),
+export const gasLimits = {
+  register: getNumberEnvVar('NEXT_PUBLIC_GAS_LIMIT_REGISTER', 60_000_000),
+  mint: getNumberEnvVar('NEXT_PUBLIC_GAS_LIMIT_MINT', 50_000_000),
+  transfer: getNumberEnvVar('NEXT_PUBLIC_GAS_LIMIT_TRANSFER', 60_000_000),
+  tournament: getNumberEnvVar('NEXT_PUBLIC_GAS_LIMIT_TOURNAMENT', 70_000_000),
 };
 
-// Mint Costs Configuration (in wei - 18 decimals)
-export const mintCosts: MintCosts = {
+// Mint Costs Configuration (in EGLD wei)
+export const mintCosts = {
   common: getEnvVar('NEXT_PUBLIC_MINT_COST_COMMON', '1000000000000000000'), // 1 EGLD
   rare: getEnvVar('NEXT_PUBLIC_MINT_COST_RARE', '2000000000000000000'), // 2 EGLD
   epic: getEnvVar('NEXT_PUBLIC_MINT_COST_EPIC', '5000000000000000000'), // 5 EGLD
@@ -95,47 +61,47 @@ export const mintCosts: MintCosts = {
 };
 
 // Application Configuration
-export const appConfig: AppConfig = {
+export const appConfig = {
   name: getEnvVar('NEXT_PUBLIC_APP_NAME', 'StardustEngine'),
   description: getEnvVar(
     'NEXT_PUBLIC_APP_DESCRIPTION',
     'Next-generation NFT Gaming Platform on MultiversX'
   ),
   version: getEnvVar('NEXT_PUBLIC_APP_VERSION', '3.0.0'),
-  devMode: getEnvBool('NEXT_PUBLIC_DEV_MODE', true),
-  debug: getEnvBool('NEXT_PUBLIC_DEBUG', true),
+  devMode: getBoolEnvVar('NEXT_PUBLIC_DEV_MODE', process.env.NODE_ENV === 'development'),
+  debug: getBoolEnvVar('NEXT_PUBLIC_DEBUG', process.env.NODE_ENV === 'development'),
 };
 
 // Feature Flags
 export const featureFlags = {
-  tournaments: getEnvBool('NEXT_PUBLIC_ENABLE_TOURNAMENTS', true),
-  achievements: getEnvBool('NEXT_PUBLIC_ENABLE_ACHIEVEMENTS', true),
-  assetTrading: getEnvBool('NEXT_PUBLIC_ENABLE_ASSET_TRADING', true),
-  analytics: getEnvBool('NEXT_PUBLIC_ENABLE_ANALYTICS', false),
-  devTools: getEnvBool('NEXT_PUBLIC_ENABLE_DEV_TOOLS', true),
+  tournaments: getBoolEnvVar('NEXT_PUBLIC_ENABLE_TOURNAMENTS', true),
+  achievements: getBoolEnvVar('NEXT_PUBLIC_ENABLE_ACHIEVEMENTS', true),
+  assetTrading: getBoolEnvVar('NEXT_PUBLIC_ENABLE_ASSET_TRADING', true),
+  analytics: getBoolEnvVar('NEXT_PUBLIC_ENABLE_ANALYTICS', false),
+  devTools: getBoolEnvVar('NEXT_PUBLIC_ENABLE_DEV_TOOLS', process.env.NODE_ENV === 'development'),
 };
 
 // External Services Configuration
 export const externalServices = {
-  walletConnectProjectId: getEnvVar('NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID'),
+  walletConnectProjectId: getEnvVar('NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID', ''),
   apiBaseUrl: getEnvVar('NEXT_PUBLIC_API_BASE_URL', 'https://stardustengine-api.onrender.com'),
-  gaTrackingId: getEnvVar('NEXT_PUBLIC_GA_TRACKING_ID'),
-  sentryDsn: getEnvVar('NEXT_PUBLIC_SENTRY_DSN'),
+  gaTrackingId: getEnvVar('NEXT_PUBLIC_GA_TRACKING_ID', ''),
+  sentryDsn: getEnvVar('NEXT_PUBLIC_SENTRY_DSN', ''),
 };
 
 // Social Links
 export const socialLinks = {
   github: getEnvVar('NEXT_PUBLIC_GITHUB_URL', 'https://github.com/Gzeu/StardustEngine'),
-  discord: getEnvVar('NEXT_PUBLIC_DISCORD_URL'),
-  twitter: getEnvVar('NEXT_PUBLIC_TWITTER_URL'),
+  discord: getEnvVar('NEXT_PUBLIC_DISCORD_URL', ''),
+  twitter: getEnvVar('NEXT_PUBLIC_TWITTER_URL', ''),
 };
 
-// Development Utilities
+// Environment helpers
 export const isDevelopment = process.env.NODE_ENV === 'development';
 export const isProduction = process.env.NODE_ENV === 'production';
 export const isTest = process.env.NODE_ENV === 'test';
 
-// Export all configuration as a single object
+// Export unified config object
 export const config = {
   app: appConfig,
   network: networkConfig,
@@ -150,33 +116,49 @@ export const config = {
   isTest,
 };
 
-// Validation function to check if all required env vars are set
-export const validateConfig = (): boolean => {
-  const requiredVars = [
-    'NEXT_PUBLIC_MULTIVERSX_NETWORK',
-    'NEXT_PUBLIC_CONTRACT_ADDRESS',
-  ];
+// Utility functions
+export const formatEGLD = (weiValue: string): string => {
+  try {
+    const egld = parseFloat(weiValue) / Math.pow(10, 18);
+    return egld.toFixed(2);
+  } catch {
+    return '0.00';
+  }
+};
 
-  const missing = requiredVars.filter(varName => !process.env[varName]);
+export const toWei = (egldValue: string): string => {
+  try {
+    const wei = parseFloat(egldValue) * Math.pow(10, 18);
+    return Math.floor(wei).toString();
+  } catch {
+    return '0';
+  }
+};
+
+// Configuration validation (non-throwing)
+export const validateConfig = (): { valid: boolean; warnings: string[] } => {
+  const warnings: string[] = [];
   
-  if (missing.length > 0) {
-    console.error('Missing required environment variables:', missing);
-    return false;
+  if (!externalServices.walletConnectProjectId) {
+    warnings.push('WalletConnect Project ID not configured - some wallet features may be limited');
   }
   
-  return true;
+  if (contractConfig.address.includes('qqqqqqqqqqqqqqqpgq')) {
+    warnings.push('Using default contract address - update for production');
+  }
+  
+  return {
+    valid: warnings.length === 0,
+    warnings
+  };
 };
 
-// Helper function to format EGLD values
-export const formatEGLD = (weiValue: string): string => {
-  const egld = parseFloat(weiValue) / Math.pow(10, 18);
-  return egld.toString();
-};
-
-// Helper function to convert EGLD to wei
-export const toWei = (egldValue: string): string => {
-  const wei = parseFloat(egldValue) * Math.pow(10, 18);
-  return wei.toString();
-};
+// Log configuration warnings in development
+if (isDevelopment) {
+  const { warnings } = validateConfig();
+  if (warnings.length > 0) {
+    console.warn('StardustEngine Config Warnings:', warnings);
+  }
+}
 
 export default config;
