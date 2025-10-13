@@ -1,10 +1,10 @@
 {
   "version": 2,
   "name": "stardustengine",
-  "framework": "nextjs",
-  "buildCommand": "cd frontend && npm run build",
+  "framework": null,
+  "buildCommand": "cd frontend && npm install && npm run build:vercel",
   "outputDirectory": "frontend/.next",
-  "installCommand": "cd frontend && npm install",
+  "installCommand": "npm install --workspaces=false && cd frontend && npm install",
   "devCommand": "cd frontend && npm run dev",
   "public": true,
   "regions": ["iad1"],
@@ -14,7 +14,17 @@
       "NEXT_PUBLIC_GATEWAY_URL": "https://devnet-gateway.multiversx.com",
       "NEXT_PUBLIC_API_URL": "https://devnet-api.multiversx.com",
       "NEXT_PUBLIC_EXPLORER_URL": "https://devnet-explorer.multiversx.com",
-      "NEXT_PUBLIC_BASE_PATH": ""
+      "NEXT_PUBLIC_BASE_PATH": "",
+      "NODE_VERSION": "20",
+      "VERCEL_BUILD_SYSTEM_REPORT": "1"
+    }
+  },
+  "functions": {
+    "frontend/src/app/api/**/*.js": {
+      "runtime": "nodejs20.x"
+    },
+    "frontend/pages/api/**/*.js": {
+      "runtime": "nodejs20.x"
     }
   },
   "headers": [
