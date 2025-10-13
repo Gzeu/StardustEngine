@@ -1,3 +1,5 @@
+const path = require('path');
+
 /** @type {import('next').NextConfig} */
 const isGitHubPages = process.env.GITHUB_PAGES === 'true'
 const isProduction = process.env.NODE_ENV === 'production'
@@ -12,7 +14,7 @@ const nextConfig = {
   assetPrefix: isGitHubPages ? '/StardustEngine/' : '',
   
   // Trailing slash for better static hosting
-  trailingSlash: true,
+  trailingSlash: false,
   
   // Image optimization
   images: {
@@ -33,9 +35,8 @@ const nextConfig = {
     ],
   },
   
-  // Performance optimizations
+  // Performance optimizations - REMOVED deprecated appDir
   experimental: {
-    appDir: true,
     optimizeCss: true,
     optimizePackageImports: [
       '@heroicons/react',
@@ -103,8 +104,11 @@ const nextConfig = {
     ]
   },
   
-  // Webpack configuration for MultiversX and WASM
+  // Webpack configuration for MultiversX and WASM + @/ alias
   webpack: (config, { dev, isServer }) => {
+    // ✅ Add @/ alias for imports
+    config.resolve.alias['@'] = path.resolve(__dirname, 'src');
+    
     // Handle WebAssembly files
     config.experiments = {
       ...config.experiments,
@@ -168,6 +172,7 @@ const nextConfig = {
   swcMinify: true,
   compress: true,
   generateEtags: true,
+  telemetry: false,  // Opt-out telemetry
   httpAgentOptions: {
     keepAlive: true,
   },
